@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Snake Game</title>
+    <style>
+        /* Modern CSS styles for a user-friendly interface */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #4a90e2;
+        }
+
+        #gameCanvas {
+            background-color: #e8f4fd;
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #score {
+            font-size: 1.5em;
+            color: #27ae60;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #pauseBtn {
+            background-color: #f39c12;
+        }
+
+        #pauseBtn:hover {
+            background-color: #e67e22;
+        }
+
+        #soundToggle {
+            background-color: #27ae60;
+        }
+
+        #soundToggle:hover {
+            background-color: #219a52;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        #nameInput {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 1em;
+            width: 200px;
+        }
+
+        #startBtn {
+            margin-top: 10px;
+        }
+
+        #scoreboard {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        #scoreboard h2 {
+            font-size: 1.8em;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        #scoreboard ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #scoreboard li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Modal for congratulations */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            max-width: 400px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            max-width: 120px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Modern Snake Game</h1>
+        <div id="nameSection">
+            <input type="text" id="nameInput" placeholder="Enter your name">
+            <button id="startBtn">Start Game</button>
+        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="controls">
+            <div id="score">Score: 0</div>
+            <div class="control-group">
+                <label for="speedSelect">Speed: </label>
+                <select id="speedSelect" disabled>
+                    <option value="slow">Slow (400ms)</option>
+                    <option value="normal" selected>Normal (300ms)</option>
+                    <option value="fast">Fast (200ms)</option>
+                    <option value="ultra">Ultra (100ms)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button id="pauseBtn" style="display: none;" disabled>Pause</button>
+                <button id="resetBtn" style="display: none;" disabled>Reset Game</button>
+                <button id="soundToggle">🔊 Sound On</button>
+            </div>
+        </div>
+        <div id="scoreboard">
+            <h2>High Scores</h2>
+            <ul id="highScoresList"></ul>
+        </div>
+    </div>
+
+    <!-- Congratulations Modal -->
+    <div id="congratsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Congratulations!</h2>
+            <p id="congratsMessage"></p>
+            <div class="modal-buttons">
+                <button id="playAgainBtn">Play Again</button>
+                <button id="mainMenuBtn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API setup for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration, type = 'sine', volume = 0.1) {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playEatSound() {
+            // Cheerful chomp sound (varied pitch for fun)
+            playSound(800, 0.1, 'square', 0.2);
+            setTimeout(() => playSound(600, 0.1, 'square', 0.15), 50);
+        }
+
+        function playGameOverSound() {
+            // Dramatic descending tone
+            playSound(400, 0.3, 'sawtooth', 0.15);
+            setTimeout(() => playSound(300, 0.3, 'sawtooth', 0.15), 100);
+            setTimeout(() => playSound(200, 0.3, 'sawtooth', 0.15), 200);
+        }
+
+        function playStartSound() {
+            // Rising motivational tone
+            playSound(200, 0.2, 'triangle', 0.1);
+            setTimeout(() => playSound(400, 0.2, 'triangle', 0.15), 100);
+            setTimeout(() => playSound(600, 0.3, 'triangle', 0.2), 200);
+        }
+
+        function playPowerUpSound() {
+            // Special high-score celebration (longer, melodic)
+            playSound(523, 0.15, 'sine', 0.2); // C5
+            setTimeout(() => playSound(659, 0.15, 'sine', 0.2), 100); // E5
+            setTimeout(() => playSound(784, 0.15, 'sine', 0.2), 200); // G5
+            setTimeout(() => playSound(1047, 0.3, 'sine', 0.25), 300); // C6
+        }
+
+        let isSoundOn = true;
+        const soundToggle = document.getElementById('soundToggle');
+        soundToggle.addEventListener('click', () => {
+            isSoundOn = !isSoundOn;
+            soundToggle.textContent = isSoundOn ? '🔊 Sound On' : '🔇 Sound Off';
+        });
+
+        // Game constants
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const canvasSize = canvas.width;
+        const tileCount = canvasSize / gridSize;
+
+        // Game variables
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+        let dx = 1;
+        let dy = 0;
+        let score = 0;
+        let gameInterval;
+        let isPaused = false;
+        let currentSpeed = 'normal';
+        let playerName = '';
+        let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+
+        // Speed levels (slower speeds)
+        const speedLevels = {
+            slow: 400,
+            normal: 300,
+            fast: 200,
+            ultra: 100
+        };
+
+        // Elements
+        const nameSection = document.getElementById('nameSection');
+        const startBtn = document.getElementById('startBtn');
+        const nameInput = document.getElementById('nameInput');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const scoreDisplay = document.getElementById('score');
+        const speedSelect = document.getElementById('speedSelect');
+        const highScoresList = document.getElementById('highScoresList');
+        const congratsModal = document.getElementById('congratsModal');
+        const congratsMessage = document.getElementById('congratsMessage');
+        const closeModal = document.querySelector('.close');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const mainMenuBtn = document.getElementById('mainMenuBtn');
+
+        // Start game after entering name
+        startBtn.addEventListener('click', () => {
+            playerName = nameInput.value.trim() || 'Player';
+            if (isSoundOn) playStartSound();
+            nameSection.style.display = 'none';
+            resetBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'inline-block';
+            speedSelect.disabled = false;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+            startGame();
+            updateHighScoresDisplay();
+        });
+
+        // Speed select change
+        speedSelect.addEventListener('change', (e) => {
+            currentSpeed = e.target.value;
+            if (!isPaused && gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = setInterval(updateGame, speedLevels[currentSpeed]);
+            }
+        });
+
+        // Pause button
+        pauseBtn.addEventListener('click', () => {
+            if (isPaused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        });
+
+        // Reset button
+        resetBtn.addEventListener('click', resetGame);
+
+        // Modal buttons
+        playAgainBtn.addEventListener('click', () => {
+            congratsModal.style.display = 'none';
+            resetGame();
+        });
+
+        mainMenuBtn.addEventListener('click', () => {
+            congratsModal.style.display = 'none';
+            nameSection.style.display = 'block';
+            resetBtn.style.display = 'none';
+            pauseBtn.style.display = 'none';
+            speedSelect.disabled = true;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = null;
+            isPaused = false;
+            pauseBtn.textContent = 'Pause';
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            drawGame();
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            congratsModal.style.display = 'none';
+            mainMenuBtn.click(); // Default to main menu
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                if (!isPaused && gameInterval) {
+                    pauseGame();
+                } else if (isPaused) {
+                    resumeGame();
+                }
+            }
+            if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -1; }
+            if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 1; }
+            if (e.key === 'ArrowLeft' && dx === 0) { dx = -1; dy = 0; }
+            if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
+        });
+
+        // Start the game
+        function startGame() {
+            gameInterval = setInterval(updateGame, speedLevels[currentSpeed]);
+            drawGame();
+        }
+
+        // Pause game
+        function pauseGame() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+                isPaused = true;
+                pauseBtn.textContent = 'Resume';
+            }
+        }
+
+        // Resume game
+        function resumeGame() {
+            if (isPaused) {
+                gameInterval = setInterval(updateGame, speedLevels[currentSpeed]);
+                isPaused = false;
+                pauseBtn.textContent = 'Pause';
+            }
+        }
+
+        // Update game loop
+        function updateGame() {
+            // Move snake
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+            // Check collisions
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                if (isSoundOn) playGameOverSound();
+                endGame();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Eat food
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                if (isSoundOn) playEatSound();
+                // Check for high score milestone (every 10 points for power-up sound)
+                if (score % 10 === 0) {
+                    if (isSoundOn) playPowerUpSound();
+                }
+                food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+                // Ensure food doesn't spawn on snake
+                while (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+                    food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+                }
+            } else {
+                snake.pop();
+            }
+
+            // Draw game
+            drawGame();
+        }
+
+        // Draw the game
+        function drawGame() {
+            ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+            // Draw snake
+            ctx.fillStyle = '#27ae60';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+
+            // Draw food
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        // End game
+        function endGame() {
+            clearInterval(gameInterval);
+            gameInterval = null;
+            pauseBtn.disabled = true;
+            speedSelect.disabled = true;
+            saveHighScore();
+            showCongrats();
+        }
+
+        // Reset game
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+            dx = 1;
+            dy = 0;
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            isPaused = false;
+            pauseBtn.textContent = 'Pause';
+            pauseBtn.disabled = false;
+            speedSelect.disabled = false;
+            currentSpeed = 'normal';
+            speedSelect.value = 'normal';
+            clearInterval(gameInterval);
+            gameInterval = null;
+            startGame();
+            updateHighScoresDisplay();
+        }
+
+        // Save high score
+        function saveHighScore() {
+            highScores.push({ name: playerName, score: score });
+            highScores.sort((a, b) => b.score - a.score);
+            highScores = highScores.slice(0, 5); // Top 5
+            localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+        }
+
+        // Update high scores display
+        function updateHighScoresDisplay() {
+            highScoresList.innerHTML = '';
+            highScores.forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = `${entry.name}: ${entry.score}`;
+                highScoresList.appendChild(li);
+            });
+        }
+
+        // Show congratulations modal
+        function showCongrats() {
+            congratsMessage.textContent = `${playerName}, you scored ${score} points! Great job!`;
+            congratsModal.style.display = 'flex';
+        }
+
+        // Initial high scores display
+        updateHighScoresDisplay();
+    </script>
+</body>
+</html>
